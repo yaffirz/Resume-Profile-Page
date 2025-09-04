@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arif Asad Ali - Interactive Resume</title>
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The SPA is designed as a single, vertically scrolling page with a sticky navigation header. The structure now features a primary accordion for the Professional Experience section to organize multiple job roles, and simple toggle buttons for Education and Certifications to display award images. This non-linear, interactive structure allows a user to explore specific details on demand, reducing clutter and improving the scannability of the resume for a recruiter. The core sections—Summary, Experience, Skills, Education, and Contact—remain accessible via the navigation bar. -->
+    <!-- Visualization & Content Choices: 
+        - Professional Experience: Report Info -> Multiple jobs and extensive responsibilities. Goal -> Organize and provide a drill-down capability. Viz/Presentation -> Interactive accordion for each job. Interaction -> User clicks a job title to expand a detailed list of responsibilities. Justification -> This approach elegantly handles a growing career history without overwhelming the user on the first view. Library/Method -> Vanilla JS and Tailwind CSS.
+        - Skills Overview: Report Info -> Various technical and soft skills. Goal -> Compare and provide a quick summary of capabilities. Viz/Presentation -> Horizontal Bar Chart. Interaction -> Hover tooltips on chart bars. Justification -> A bar chart offers a more impactful and immediate visual representation of skill distribution than a simple list. Library/Method -> Chart.js (Canvas).
+        - Education/Certifications: Report Info -> Textual list with a desire to show visual proof. Goal -> Validate qualifications. Viz/Presentation -> Toggle button revealing an image. Interaction -> User clicks the button to show the award image. Justification -> Visually confirms achievements, adding a dynamic and trustworthy element to the resume. Library/Method -> Vanilla JS and placeholder images via a web service.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #383838;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px;
+            }
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-content.active {
+            max-height: 1000px;
+            transition: max-height 0.5s ease-in;
+        }
+        .image-container {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .image-container.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .tab-btn.active {
+            background-color: #14b8a6;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .exp-details {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .exp-details.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 shadow-sm">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-slate-800">Arif Asad Ali</h1>
+                    <p class="text-sm text-slate-600">Information Technology Professional</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <nav class="hidden md:flex space-x-8">
+                        <a href="#summary" class="text-slate-600 hover:text-teal-600 font-medium transition-colors">Summary</a>
+                        <a href="#experience" class="text-slate-600 hover:text-teal-600 font-medium transition-colors">Experience</a>
+                        <a href="#skills" class="text-slate-600 hover:text-teal-600 font-medium transition-colors">Skills</a>
+                        <a href="#education" class="text-slate-600 hover:text-teal-600 font-medium transition-colors">Education</a>
+                        <a href="#contact" class="text-slate-600 hover:text-teal-600 font-medium transition-colors">Contact</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12 md:py-20">
+        
+        <section id="summary" class="mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-800 mb-4 text-center">Professional Summary</h2>
+            <div class="max-w-3xl mx-auto text-center text-slate-700 leading-relaxed">
+                 <p>Highly motivated IT professional with a First Class Honours Bachelor of Science in Information Technology. My academic foundation is complemented by over five years of hands-on experience as an IT Technician, where I honed my skills in troubleshooting, system management, and network administration. I possess international certifications in Networking+ and Windows Server Active Directory, alongside creative proficiency in graphic design and video editing with Adobe After Effects. I am eager to contribute to a forward-thinking organization where I can leverage my diverse skill set for long-term growth and success.</p>
+            </div>
+        </section>
+        
+        <section id="experience" class="mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-800 mb-8 text-center">Professional Experience</h2>
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8 max-w-4xl mx-auto">
+                <div class="flex flex-col md:flex-row md:space-x-4 mb-6">
+                    <button class="job-btn w-full text-left py-2 flex justify-between items-center text-slate-800 font-bold text-xl md:text-2xl hover:text-teal-600 transition-colors">
+                        IT Technician<br/>@ Global Brands Group
+                    </button>
+                    <button class="job-btn w-full text-left py-2 flex justify-between items-center text-slate-800 font-bold text-xl md:text-2xl hover:text-teal-600 transition-colors mt-2 md:mt-0">
+                        IT Technician<br/>@ School of Practical Accounting
+                    </button>
+                </div>
+
+                <!-- Content for all jobs, hidden by default -->
+                <div id="global-brands-content" class="job-content hidden">
+                    <p class="font-medium text-slate-500 text-sm mb-4">May 2024 - Present</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button class="exp-btn px-4 py-2 rounded-full font-semibold transition-colors bg-teal-600 text-white" data-category="pos">System & POS Management</button>
+                        <button class="exp-btn px-4 py-2 rounded-full font-semibold transition-colors bg-slate-200 hover:bg-slate-300 text-slate-700" data-category="network">Network & Infrastructure</button>
+                        <button class="exp-btn px-4 py-2 rounded-full font-semibold transition-colors bg-slate-200 hover:bg-slate-300 text-slate-700" data-category="support">On-Site & Remote Support</button>
+                    </div>
+                    <div id="global-brands-details">
+                        <ul class="list-disc pl-5 space-y-2 text-slate-700 exp-details active" data-category="pos">
+                            <li>Assembled and repaired Oracle Microsymphony Registers.</li>
+                            <li>Maintained, configured and distributed receipt printers and office printers (both network and USB).</li>
+                            <li>Used the Oracle MICROS Simphony web platform to create, update, modify and configure users and user-related data (e.g., assigning and removing staff from software access, promotions, and demotions).</li>
+                            <li>Created and deployed menu items on registers across multiple brands and countries.</li>
+                            <li>Configured Oracle-specific devices to work at specific locations and brands.</li>
+                            <li>Configured and assigned Menu boards to their specific location using Magic Info.</li>
+                        </ul>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-700 exp-details" data-category="network">
+                            <li>Managed and maintained network infrastructure for the fast food restaurants Church's Texas Chicken, Rituals Coffee House, Pizza Boys and Wok'n'Roll.</li>
+                            <li>Configured and maintained Windows Server Active Directory user profiles.</li>
+                            <li>Created and configured Active Directory computers and users.</li>
+                        </ul>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-700 exp-details" data-category="support">
+                            <li>Provided IT support for the organization and stability of online meetings using Microsoft Teams and Zoom.</li>
+                            <li>Replaced equipment on-site and provided onsite emergency assistance for hardware, software and network issues.</li>
+                            <li>Provided technical troubleshooting and user support for on-location staff and managers.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="accounting-content" class="job-content hidden">
+                    <p class="font-medium text-slate-500 text-sm mb-4">January 2019 - April 2024</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button class="exp-btn px-4 py-2 rounded-full font-semibold transition-colors bg-teal-600 text-white" data-category="hardware">Hardware & Network Administration</button>
+                        <button class="exp-btn px-4 py-2 rounded-full font-semibold transition-colors bg-slate-200 hover:bg-slate-300 text-slate-700" data-category="deployment">System & Software Deployment</button>
+                        <button class="exp-btn px-4 py-2 rounded-full font-semibold transition-colors bg-slate-200 hover:bg-slate-300 text-slate-700" data-category="web-media">Web & Media Production</button>
+                        <button class="exp-btn px-4 py-2 rounded-full font-semibold transition-colors bg-slate-200 hover:bg-slate-300 text-slate-700" data-category="training">Technical Training & Support</button>
+                    </div>
+                    <div id="accounting-details">
+                        <ul class="list-disc pl-5 space-y-2 text-slate-700 exp-details active" data-category="hardware">
+                            <li>Built, repaired, and configured computers, including OS installations.</li>
+                            <li>Managed network infrastructure for computer labs and offices.</li>
+                            <li>Maintained and distributed printers of all scales.</li>
+                            <li>Built Network Attached Storage (NAS) systems.</li>
+                        </ul>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-700 exp-details" data-category="deployment">
+                            <li>Created and distributed pre-configured operating systems using cloning.</li>
+                        </ul>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-700 exp-details" data-category="web-media">
+                            <li>Developed and managed the company's website and Learning Management System (LMS).</li>
+                            <li>Produced and edited interactive videos for the LMS.</li>
+                        </ul>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-700 exp-details" data-category="training">
+                            <li>Provided technical troubleshooting and end-user support.</li>
+                            <li>Taught courses on computer literacy, repair, graphic design, and video editing.</li>
+                            <li>Acted as a liaison between the school and external technology vendors for large projects.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-800 mb-8 text-center">Skills & Certifications</h2>
+            <div class="grid md:grid-cols-5 gap-8 items-start max-w-6xl mx-auto">
+                <div class="md:col-span-3 bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="font-bold text-lg text-slate-700 mb-4 text-center">Technical Skill Overview</h3>
+                    <p class="text-center text-slate-600 text-sm mb-4">This chart provides a visual representation of my core technical competencies. Hover over the bars for more details.</p>
+                    <div class="chart-container">
+                        <canvas id="skillsChart"></canvas>
+                    </div>
+                </div>
+                <div class="md:col-span-2 space-y-6">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="font-bold text-lg text-slate-700 mb-4">Certifications</h3>
+                        <ul class="space-y-4 text-slate-700">
+                            <li class="flex items-start flex-col">
+                                <span class="font-semibold">Networking+</span>
+                                <span class="text-sm text-slate-500">London International College (Distinction)</span>
+                                <button class="toggle-image-btn bg-teal-600 text-white font-bold py-1 px-4 text-xs rounded-full mt-2 hover:bg-teal-700 transition-colors">Show Award</button>
+                                <div class="image-container mt-4 rounded-md shadow-lg overflow-hidden w-full">
+                                    <img src="Pictures/Cert Network +.png" alt="Networking+ Award">
+                                </div>
+                            </li>
+                            <li class="flex items-start flex-col">
+                                <span class="font-semibold">Windows Server Active Directory</span>
+                                <span class="text-sm text-slate-500">London International College (Distinction)</span>
+                                <button class="toggle-image-btn bg-teal-600 text-white font-bold py-1 px-4 text-xs rounded-full mt-2 hover:bg-teal-700 transition-colors">Show Award</button>
+                                <div class="image-container mt-4 rounded-md shadow-lg overflow-hidden w-full">
+                                     <img src="Pictures/Cert Server Infrastructure.png" alt="Windows Server Active Directory Award">
+                                </div>
+                            </li>
+                             <li class="flex items-start flex-col">
+                                <span class="font-semibold">Adobe After Effects</span>
+                                <span class="text-sm text-slate-500">Udemy</span>
+                                <button class="toggle-image-btn bg-teal-600 text-white font-bold py-1 px-4 text-xs rounded-full mt-2 hover:bg-teal-700 transition-colors">Show Award</button>
+                                <div class="image-container mt-4 rounded-md shadow-lg overflow-hidden w-full">
+                                     <img src="Pictures/Udemy Certificate.jpg" alt="Adobe After Effects Award">
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="font-bold text-lg text-slate-700 mb-4">Additional Skills</h3>
+                        <div class="flex flex-wrap gap-2">
+                           <span class="skill-tag font-semibold px-4 py-1 rounded-full">Customer Service</span>
+                           <span class="skill-tag font-semibold px-4 py-1 rounded-full">Inventory Management</span>
+                           <span class="skill-tag font-semibold px-4 py-1 rounded-full">Brand Awareness</span>
+                           <span class="skill-tag font-semibold px-4 py-1 rounded-full">Communication</span>
+                           <span class="skill-tag font-semibold px-4 py-1 rounded-full">Microsoft Office</span>
+                           <span class="skill-tag font-semibold px-4 py-1 rounded-full">Google Suite</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="education" class="mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-800 mb-8 text-center">Education</h2>
+            <div class="max-w-3xl mx-auto space-y-6">
+                 <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-teal-700">Bachelor of Science with Honors First Class in Information Technology</h3>
+                    <p class="text-slate-600">University of Bedfordshire</p>
+                    <p class="text-sm text-slate-500">October 2024</p>
+                    <button class="toggle-image-btn bg-teal-600 text-white font-bold py-1 px-4 text-xs rounded-full mt-2 hover:bg-teal-700 transition-colors">Show Award</button>
+                    <div class="image-container mt-4 rounded-md shadow-lg overflow-hidden w-full">
+                         <img src="Pictures/Bachelors Degree - Arif Asad Ali  - Scan.jpg" alt="Bachelor of Science Award">
+                    </div>
+                 </div>
+                 <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-teal-700">Diploma in Business Information Technology (Level 5)</h3>
+                    <p class="text-slate-600">School of Accounting & Management</p>
+                    <button class="toggle-image-btn bg-teal-600 text-white font-bold py-1 px-4 text-xs rounded-full mt-2 hover:bg-teal-700 transition-colors">Show Award</button>
+                    <div class="image-container mt-4 rounded-md shadow-lg overflow-hidden w-full">
+                         <img src="Pictures/Dip Level 5 SAMS.png" alt="Diploma Level 5 Award">
+                    </div>
+                 </div>
+                 <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-teal-700">Diploma in Business Information Technology (Level 4)</h3>
+                    <p class="text-slate-600">School of Accounting & Management</p>
+                    <button class="toggle-image-btn bg-teal-600 text-white font-bold py-1 px-4 text-xs rounded-full mt-2 hover:bg-teal-700 transition-colors">Show Award</button>
+                    <div class="image-container mt-4 rounded-md shadow-lg overflow-hidden w-full">
+                         <img src="Pictures/Dip Level 4 SAMS.png" alt="Diploma Level 4 Award">
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <section id="contact" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-800 mb-8 text-center">Contact & References</h2>
+            <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-8 text-center">
+                <p class="text-slate-700 mb-6">Feel free to reach out. I look forward to discussing how my skills can benefit your team.</p>
+                <div class="flex justify-center items-center flex-wrap gap-6 mb-8">
+                    <a href="mailto:arif.asad.ali@outlook.com" class="font-medium text-teal-600 hover:text-teal-800 transition-colors">arif.asad.ali@outlook.com</a>
+                    <span class="text-slate-300 hidden sm:inline">|</span>
+                    <span class="font-medium text-slate-700">1-868-482-0707</span>
+                </div>
+                 <div id="references" class="text-left text-slate-700 border-t pt-6 hidden">
+                    <h4 class="font-bold text-lg mb-4 text-center">Professional References</h4>
+                    <div class="grid sm:grid-cols-2 gap-6">
+                        <div>
+                            <p class="font-semibold">Ms. Evana Verasammy</p>
+                            <p class="text-sm">Marketing Manager, School of Practical Accounting (S.P.A.)</p>
+                            <p class="text-sm text-slate-500">Contact: 620-2879</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">Mr. Akash Bajnath</p>
+                            <p class="text-sm">Managing Director, Chameleon Creations</p>
+                            <p class="text-sm text-slate-500">Contact: 380-6655</p>
+                        </div>
+                    </div>
+                </div>
+                <button id="toggle-references" class="bg-teal-600 text-white font-bold py-2 px-6 rounded-full hover:bg-teal-700 transition-all duration-300 shadow-md">Show References</button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 mt-12 border-t border-slate-200">
+        <p class="text-slate-500 text-sm">&copy; 2025 Arif Asad Ali. Interactive resume created to showcase skills.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const skillsCtx = document.getElementById('skillsChart').getContext('2d');
+            const skillsChart = new Chart(skillsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Hardware & Networking', 'System Administration', 'Web & LMS Management', 'Creative & Media Production', 'Technical Support & Training'],
+                    datasets: [{
+                        label: 'Proficiency Level',
+                        data: [90, 85, 80, 88, 95],
+                        backgroundColor: 'rgba(20, 184, 166, 0.6)',
+                        borderColor: 'rgba(15, 118, 110, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        y: {
+                           ticks: {
+                                autoSkip: false
+                           },
+                           grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                           }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Proficiency: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const refButton = document.getElementById('toggle-references');
+            const refSection = document.getElementById('references');
+            refButton.addEventListener('click', () => {
+                const isHidden = refSection.classList.contains('hidden');
+                if (isHidden) {
+                    refSection.classList.remove('hidden');
+                    refButton.textContent = 'Hide References';
+                } else {
+                    refSection.classList.add('hidden');
+                    refButton.textContent = 'Show References';
+                }
+            });
+
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    header.classList.add('py-2');
+                    header.classList.remove('py-4');
+                } else {
+                    header.classList.add('py-4');
+                    header.classList.remove('py-2');
+                }
+            });
+
+            // Job button and content management
+            const jobButtons = document.querySelectorAll('.job-btn');
+            const jobContents = document.querySelectorAll('.job-content');
+
+            jobButtons.forEach((button, index) => {
+                // Assign a data attribute to each job button and corresponding content
+                button.setAttribute('data-job-id', `job-${index}`);
+                jobContents[index].setAttribute('data-job-content-id', `job-${index}`);
+
+                button.addEventListener('click', () => {
+                    const jobId = `job-${index}`;
+                    
+                    // Hide all job content
+                    jobContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // Show the selected job's content
+                    document.querySelector(`[data-job-content-id="${jobId}"]`).classList.remove('hidden');
+                });
+            });
+
+            // Category button and details management
+            const expButtons = document.querySelectorAll('.exp-btn');
+            expButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const currentButton = e.target;
+                    const category = currentButton.dataset.category;
+                    // FIX: Changed selector to correctly target the details container
+                    const jobDetailsContainer = currentButton.closest('.job-content').querySelector('div[id$="-details"]');
+
+                    // Deactivate all buttons in the current job's category bar
+                    currentButton.closest('.job-content').querySelectorAll('.exp-btn').forEach(btn => {
+                        btn.classList.remove('bg-teal-600', 'text-white');
+                        btn.classList.add('bg-slate-200', 'hover:bg-slate-300', 'text-slate-700');
+                    });
+
+                    // Activate the clicked button
+                    currentButton.classList.remove('bg-slate-200', 'hover:bg-slate-300', 'text-slate-700');
+                    currentButton.classList.add('bg-teal-600', 'text-white');
+
+                    // Hide all responsibility lists in the current job's details
+                    jobDetailsContainer.querySelectorAll('.exp-details').forEach(details => {
+                        details.classList.remove('active');
+                    });
+
+                    // Show the selected responsibility list
+                    jobDetailsContainer.querySelector(`.exp-details[data-category="${category}"]`).classList.add('active');
+                });
+            });
+
+            const imageToggles = document.querySelectorAll('.toggle-image-btn');
+            imageToggles.forEach(button => {
+                button.addEventListener('click', () => {
+                    const imageContainer = button.nextElementSibling;
+                    if (imageContainer.classList.contains('active')) {
+                        imageContainer.classList.remove('active');
+                        button.textContent = 'Show Award';
+                    } else {
+                        imageContainer.classList.add('active');
+                        button.textContent = 'Hide Award';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
